@@ -1,14 +1,14 @@
-FROM php:8.1-apache
+FROM php:8.2-apache
 
 # Instalar dependencias necesarias
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libonig-dev \
     libxml2-dev \
+    libzip-dev \
     zip \
     unzip \
     git \
-    libzip-dev \
     && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Instalar Composer
@@ -17,15 +17,15 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Copiar el proyecto al contenedor
 COPY . /var/www/html
 
-# Copiar .env.example como .env
+# Copiar .env.example como .env (evita errores en composer)
 RUN cp /var/www/html/.env.example /var/www/html/.env
 
-# Definir variables mínimas necesarias para que composer no falle
+# Variables mínimas necesarias para que composer post-install no falle
 ENV APP_ENV=production
 ENV APP_KEY=base64:placeholderkey12345678901234567890123456789012==
 ENV APP_DEBUG=false
 
-# Instalar dependencias PHP
+# Instalar dependencias PHP con composer
 RUN cd /var/www/html && composer install --no-dev --prefer-dist --optimize-autoloader
 
 # Ajustar permisos
