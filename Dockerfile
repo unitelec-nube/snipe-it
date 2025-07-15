@@ -16,6 +16,9 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Copiar el proyecto al contenedor
 COPY . /var/www/html
 
+# Copiar .env.example como .env (necesario para que composer no falle)
+RUN cp /var/www/html/.env.example /var/www/html/.env
+
 # Instalar dependencias PHP
 RUN cd /var/www/html && composer install --no-dev --prefer-dist --optimize-autoloader
 
