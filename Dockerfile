@@ -8,7 +8,8 @@ RUN apt-get update && apt-get install -y \
     zip \
     unzip \
     git \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+    libzip-dev \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
@@ -16,8 +17,13 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 # Copiar el proyecto al contenedor
 COPY . /var/www/html
 
-# Copiar .env.example como .env (necesario para que composer no falle)
+# Copiar .env.example como .env
 RUN cp /var/www/html/.env.example /var/www/html/.env
+
+# Definir variables mínimas necesarias para que composer no falle
+ENV APP_ENV=production
+ENV APP_KEY=base64:placeholderkey12345678901234567890123456789012==
+ENV APP_DEBUG=false
 
 # Instalar dependencias PHP
 RUN cd /var/www/html && composer install --no-dev --prefer-dist --optimize-autoloader
